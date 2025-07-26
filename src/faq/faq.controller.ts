@@ -1,5 +1,5 @@
 // src/faq/faq.controller.ts
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put,Delete,Body, Param } from '@nestjs/common';
 import { FaqService } from './faq.service';
 import { Faq } from './faq.entity';
 
@@ -22,9 +22,14 @@ export class FaqController {
     return this.faqService.create(faq);
   }
 
-  // ✅ New route to search by question
-  @Get('search/:question')
-  findByQuestion(@Param('question') question: string): Promise<Faq | null> {
-    return this.faqService.findByQuestion(question);
+    @Put(':id')
+  update(@Param('id') id: string, @Body() faqData: Partial<Faq>): Promise<Faq> {
+    return this.faqService.update(+id, faqData);
   }
+
+  @Delete(':id')
+  delete(@Param('id') id: string): Promise<void> {
+    return this.faqService.delete(+id);
+  }
+ 
 }

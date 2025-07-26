@@ -24,8 +24,17 @@ export class FaqService {
   create(faq: Partial<Faq>): Promise<Faq> {
     return this.faqRepo.save(faq);
   }
-  async findByQuestion(question: string): Promise<Faq | null> {
-  return this.faqRepo.findOne({ where: { question } });
-}
+ 
+ async update(id: number, data: Partial<Faq>): Promise<Faq> {
+    const faq = await this.findOne(id);
+    Object.assign(faq, data);
+    return this.faqRepo.save(faq);
+  }
 
+  async delete(id: number): Promise<void> {
+    const result = await this.faqRepo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('FAQ not found');
+    }
+  }
 }
