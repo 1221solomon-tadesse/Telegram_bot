@@ -30,4 +30,8 @@ export class UsersService {
   remove(id: number) {
     return this.userRepo.delete(id);
   }
+   findByNameAndEmail(username: string, email: string) {
+  return this.userRepo.findOne({ where: { username,email } });
+}
+
 }

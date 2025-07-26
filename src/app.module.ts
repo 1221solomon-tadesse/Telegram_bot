@@ -14,7 +14,7 @@ import { FaqModule } from './faq/faq.module';
       username: 'nestuser',
       password: 'nestpass',
       database: 'nestdb',
-      entities: [User,Faq],       // <-- explicitly pass entity classes here
+      entities: [User,Faq],      
       synchronize: true,
     }),
     UsersModule,

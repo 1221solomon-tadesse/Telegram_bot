@@ -1,5 +1,4 @@
-import { bot } from '../bot/bot.module'; // adjust path to match your project
-
+import { bot } from '../bot/bot.module';
 bot.action(/^faq_(\w+)/, async (ctx) => {
   try {
     await ctx.answerCbQuery();

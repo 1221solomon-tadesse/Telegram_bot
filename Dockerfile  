@@ -1,0 +1,18 @@
+# Step 1: Use Node base image
+FROM node:18-alpine
+
+# Step 2: Create app directory
+WORKDIR /app
+
+# Step 3: Copy dependencies
+COPY package*.json ./
+RUN npm install
+
+# Step 4: Copy source code
+COPY . .
+
+# Step 5: Build NestJS
+RUN npm run build
+
+# Step 6: Start app
+CMD ["node", "dist/main.js"]

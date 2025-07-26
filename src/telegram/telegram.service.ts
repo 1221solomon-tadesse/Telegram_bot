@@ -35,7 +35,6 @@ export class TelegramService implements OnModuleInit {
 
     // Delay registering actions until FAQs are available
     const faqs: Faq[] = await this.faqService.findAll();
-
     faqs.forEach((faq) => {
       this.bot.action(`faq_${faq.id}`, async (ctx) => {
         ctx.answerCbQuery();
