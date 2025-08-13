@@ -7,6 +7,8 @@ import { User } from './users/user.entity';
 import { Faq } from './faq/faq.entity';
 import { TelegramModule } from './telegram/telegram.module';
 import { FaqModule } from './faq/faq.module';
+import { AssignmentsService } from './assignments/assignments.service';
+import { AssignmentsModule } from './assignments/assignments.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { FaqModule } from './faq/faq.module';
     UsersModule,
     TelegramModule,
     FaqModule,
+    AssignmentsModule,
   ],
+  providers: [AssignmentsService],
 })
 export class AppModule {}

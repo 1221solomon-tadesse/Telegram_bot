@@ -1,6 +1,6 @@
 // src/faq/faq.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from '../users/user.entity';
 @Entity()
 export class Faq {
   @PrimaryGeneratedColumn()
@@ -14,4 +14,9 @@ export class Faq {
 
   @Column()
   type: 'text' | 'video'; // determines if response is a video link or text
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'assignedTo' })
+  assignedTo?: User;
+
 }
