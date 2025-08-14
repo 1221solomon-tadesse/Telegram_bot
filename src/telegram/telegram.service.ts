@@ -1,10 +1,11 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Telegraf, Markup } from 'telegraf';
 import { FaqService } from '../faq/faq.service';
-import { Faq } from '../faq/faq.entity';
+import { FAQ } from '../faq/faq.entity';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
+
 @Injectable()
 export class TelegramService implements OnModuleInit {
   private bot: Telegraf;
@@ -20,8 +21,13 @@ export class TelegramService implements OnModuleInit {
 
     this.bot = new Telegraf(token);
 
+    // Start command
     this.bot.start(async (ctx) => {
       const faqs = await this.faqService.findAll();
+      if (!faqs.length) {
+        return ctx.reply('No FAQs available at the moment.');
+      }
+
       ctx.reply(
         'Choose a topic:',
         Markup.inlineKeyboard(
@@ -33,11 +39,12 @@ export class TelegramService implements OnModuleInit {
       );
     });
 
-    // Delay registering actions until FAQs are available
-    const faqs: Faq[] = await this.faqService.findAll();
+    // Register FAQ actions
+    const faqs: FAQ[] = await this.faqService.findAll();
     faqs.forEach((faq) => {
       this.bot.action(`faq_${faq.id}`, async (ctx) => {
         ctx.answerCbQuery();
+
         if (faq.type === 'video') {
           await ctx.replyWithVideo(faq.answer);
         } else {
@@ -46,7 +53,7 @@ export class TelegramService implements OnModuleInit {
       });
     });
 
-    this.bot.launch();
+    await this.bot.launch();
     console.log('🤖 Telegram bot is up and running...');
   }
 }

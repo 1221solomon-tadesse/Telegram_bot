@@ -1,17 +1,18 @@
-import { Controller, Post, Param, Patch } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AssignmentsService } from './assignments.service';
 
-@Controller('assignments')
-export class AssignmentsController {
-  constructor(private assignmentsService: AssignmentsService) {}
+describe('AssignmentsService', () => {
+  let service: AssignmentsService;
 
-  @Post(':userId/:faqId')
-  assign(@Param('userId') userId: number, @Param('faqId') faqId: number) {
-    return this.assignmentsService.assignQuestion(userId, faqId);
-  }
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [AssignmentsService],
+    }).compile();
 
-  @Patch(':id/answered')
-  markAnswered(@Param('id') id: number) {
-    return this.assignmentsService.markAsAnswered(id);
-  }
-}
+    service = module.get<AssignmentsService>(AssignmentsService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});

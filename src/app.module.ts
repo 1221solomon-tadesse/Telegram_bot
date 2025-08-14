@@ -4,16 +4,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
-import { Faq } from './faq/faq.entity';
+import { FAQ } from './faq/faq.entity';
 import { TelegramModule } from './telegram/telegram.module';
 import { FaqModule } from './faq/faq.module';
 import { AssignmentsService } from './assignments/assignments.service';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { Assignment } from './assignments/assignment.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Makes config available across modules
+      isGlobal: true, 
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -25,7 +26,7 @@ import { AssignmentsModule } from './assignments/assignments.module';
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_NAME'),
-        entities: [User, Faq],
+        entities: [User, FAQ,Assignment],
         synchronize: true,
       }),
     }),
@@ -33,7 +34,8 @@ import { AssignmentsModule } from './assignments/assignments.module';
     TelegramModule,
     FaqModule,
     AssignmentsModule,
+    
   ],
-  providers: [AssignmentsService],
+  // providers: [AssignmentsService],
 })
 export class AppModule {}

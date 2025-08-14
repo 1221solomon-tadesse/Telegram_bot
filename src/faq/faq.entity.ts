@@ -1,22 +1,21 @@
-// src/faq/faq.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from '../users/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Assignment } from '../assignments/assignment.entity';
+
 @Entity()
-export class Faq {
+export class FAQ {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   question: string;
 
-  @Column()
+  @Column({ nullable: true })
   answer: string;
 
-  @Column()
-  type: 'text' | 'video'; // determines if response is a video link or text
+  // Add this new field
+  @Column({ default: 'text' })
+  type: 'text' | 'video';
 
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'assignedTo' })
-  assignedTo?: User;
-
+  @OneToMany(() => Assignment, (assignment) => assignment.faq)
+  assignments: Assignment[];
 }
