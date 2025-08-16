@@ -1,59 +1,49 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Telegraf, Markup } from 'telegraf';
-import { FaqService } from '../faq/faq.service';
-import { FAQ } from '../faq/faq.entity';
-import * as dotenv from 'dotenv';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as TelegramBot from 'node-telegram-bot-api';
 
-dotenv.config();
+import { Language } from '../languages/language.entity';
+import { Question } from '../quations/question.entity';
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
-  private bot: Telegraf;
+  private bot: TelegramBot;
 
-  constructor(private readonly faqService: FaqService) {}
+  constructor(
+    @InjectRepository(Language)
+    private languageRepo: Repository<Language>,
+    @InjectRepository(Question)
+    private questionRepo: Repository<Question>,
+  ) {}
 
-  async onModuleInit() {
+  onModuleInit() {
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    if (!token) {
-      console.error('Telegram bot token missing in env!');
-      return;
-    }
+    if (!token) throw new Error('TELEGRAM_BOT_TOKEN is not set');
+    this.bot = new TelegramBot(token, { polling: true });
+  }
 
-    this.bot = new Telegraf(token);
+  // Telegram interactive methods remain as before
 
-    // Start command
-    this.bot.start(async (ctx) => {
-      const faqs = await this.faqService.findAll();
-      if (!faqs.length) {
-        return ctx.reply('No FAQs available at the moment.');
-      }
+  // ✅ API methods for Postman
+  async getLanguages() {
+    return this.languageRepo.find();
+  }
 
-      ctx.reply(
-        'Choose a topic:',
-        Markup.inlineKeyboard(
-          faqs.map((faq) =>
-            Markup.button.callback(faq.question, `faq_${faq.id}`),
-          ),
-          { columns: 1 },
-        ),
-      );
+  async getQuestions(langId: number) {
+    return this.questionRepo.find({
+      where: { language: { id: langId } },
+      relations: ['language'],
     });
+  }
 
-    // Register FAQ actions
-    const faqs: FAQ[] = await this.faqService.findAll();
-    faqs.forEach((faq) => {
-      this.bot.action(`faq_${faq.id}`, async (ctx) => {
-        ctx.answerCbQuery();
+  async getAnswer(questionId: number) {
+    const question = await this.questionRepo.findOne({ where: { id: questionId } });
+    return question ? question.content : 'Not found';
+  }
 
-        if (faq.type === 'video') {
-          await ctx.replyWithVideo(faq.answer);
-        } else {
-          await ctx.reply(faq.answer);
-        }
-      });
-    });
-
-    await this.bot.launch();
-    console.log('🤖 Telegram bot is up and running...');
+  async sendMessage(chatId: number, text: string) {
+    if (!this.bot) throw new Error('Telegram bot not initialized');
+    return this.bot.sendMessage(chatId, text);
   }
 }

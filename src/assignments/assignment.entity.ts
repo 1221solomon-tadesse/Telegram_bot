@@ -1,18 +1,28 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
+import {
+  Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, Column,
+} from 'typeorm';
 import { User } from '../users/user.entity';
-import { FAQ } from '../faq/faq.entity';
+import { Question } from '../quations/question.entity';
+
+export type AssignmentStatus = 'pending' | 'answered' | 'rejected';
 
 @Entity()
 export class Assignment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.assignments, { eager: true })
+  @ManyToOne(() => User, (u) => u.assignments, { eager: true, onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => FAQ, (faq) => faq.assignments, { eager: true })
-  faq: FAQ;
+  @ManyToOne(() => Question, (q) => q.assignments, { eager: true, onDelete: 'CASCADE' })
+  question: Question;
 
-  @Column({ default: false })
-  answered: boolean;
+  @CreateDateColumn()
+  assignedAt: Date;
+
+  @Column({ type: 'enum', enum: ['pending', 'answered', 'rejected'], default: 'pending' })
+  status: AssignmentStatus;
+
+  @Column({ type: 'timestamp', nullable: true })
+  answeredAt: Date | null;
 }

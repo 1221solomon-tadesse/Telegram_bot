@@ -3,40 +3,39 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Assignment } from './assignment.entity';
 import { User } from '../users/user.entity';
-import { FAQ } from '../faq/faq.entity';
+import { Question } from '../quations/question.entity';
+import { AssignQuestionDto } from './dto/assign-question.dto';
+import { UpdateAssignmentStatusDto } from './dto/update-assignment-status.dto';
 
 @Injectable()
 export class AssignmentsService {
- constructor(
-  @InjectRepository(Assignment)
-  private assignmentRepo: Repository<Assignment>,
+  constructor(
+    @InjectRepository(Assignment) private repo: Repository<Assignment>,
+    @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Question) private qRepo: Repository<Question>,
+  ) {}
 
-  @InjectRepository(User)
-  private userRepo: Repository<User>,
-
-  @InjectRepository(FAQ)
-  private faqRepo: Repository<FAQ>,
-) {}
-  async assignQuestion(userId: number, faqId: number): Promise<Assignment> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
+  async assign(dto: AssignQuestionDto) {
+    const user = await this.userRepo.findOne({ where: { id: dto.userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    const faq = await this.faqRepo.findOne({ where: { id: faqId } });
-    if (!faq) throw new NotFoundException('FAQ not found');
+    const question = await this.qRepo.findOne({ where: { id: dto.questionId } });
+    if (!question) throw new NotFoundException('Question not found');
 
-    const assignment = this.assignmentRepo.create({ user, faq });
-    return this.assignmentRepo.save(assignment);
+    const a = this.repo.create({ user, question, status: 'pending' });
+    return this.repo.save(a);
   }
 
-  async markAsAnswered(assignmentId: number): Promise<Assignment> {
-    const assignment = await this.assignmentRepo.findOne({ where: { id: assignmentId } });
-    if (!assignment) throw new NotFoundException('Assignment not found');
-
-    assignment.answered = true;
-    return this.assignmentRepo.save(assignment);
+  findForUser(userId: number) {
+    return this.repo.find({ where: { user: { id: userId } } });
   }
 
-  async findAll(): Promise<Assignment[]> {
-    return this.assignmentRepo.find();
+  async updateStatus(id: number, dto: UpdateAssignmentStatusDto) {
+    const a = await this.repo.findOne({ where: { id } });
+    if (!a) throw new NotFoundException('Assignment not found');
+
+    a.status = dto.status;
+    a.answeredAt = dto.status === 'answered' ? new Date() : null;
+    return this.repo.save(a);
   }
 }

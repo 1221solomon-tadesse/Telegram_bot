@@ -1,23 +1,24 @@
-import { Controller, Post, Patch, Param, Get } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
-import { Assignment } from './assignment.entity';
+import { AssignQuestionDto } from './dto/assign-question.dto';
+import { UpdateAssignmentStatusDto } from './dto/update-assignment-status.dto';
 
 @Controller('assignments')
 export class AssignmentsController {
-  constructor(private readonly assignmentsService: AssignmentsService) {}
+  constructor(private readonly service: AssignmentsService) {}
 
-  @Post(':userId/:faqId')
-  assign(@Param('userId') userId: number, @Param('faqId') faqId: number): Promise<Assignment> {
-    return this.assignmentsService.assignQuestion(userId, faqId);
+  @Post()
+  assign(@Body() dto: AssignQuestionDto) {
+    return this.service.assign(dto);
   }
 
-  @Patch(':id/answered')
-  markAnswered(@Param('id') id: number): Promise<Assignment> {
-    return this.assignmentsService.markAsAnswered(id);
+  @Get('user/:userId')
+  forUser(@Param('userId') userId: string) {
+    return this.service.findForUser(+userId);
   }
 
-  @Get()
-  findAll(): Promise<Assignment[]> {
-    return this.assignmentsService.findAll();
+  @Put(':id/status')
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateAssignmentStatusDto) {
+    return this.service.updateStatus(+id, dto);
   }
 }

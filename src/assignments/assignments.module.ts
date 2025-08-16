@@ -4,14 +4,11 @@ import { AssignmentsService } from './assignments.service';
 import { AssignmentsController } from './assignments.controller';
 import { Assignment } from './assignment.entity';
 import { User } from '../users/user.entity';
-import { FAQ } from '../faq/faq.entity';
+import { Question } from '../quations/question.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Assignment, User, FAQ]) // <-- THIS IS CRUCIAL
-  ],
+  imports: [TypeOrmModule.forFeature([Assignment, User, Question])],
   providers: [AssignmentsService],
   controllers: [AssignmentsController],
-  exports: [AssignmentsService], 
 })
 export class AssignmentsModule {}
