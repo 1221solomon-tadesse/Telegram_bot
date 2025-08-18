@@ -21,3 +21,4 @@ export class UsersController {
     return this.service.findOne(+id);
   }
 }
+//this is the user controller page user controller is the main service for request anf response , the request sent to the server the controller check the request and send the response based on thier request ,
