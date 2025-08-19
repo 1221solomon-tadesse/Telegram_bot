@@ -33,8 +33,7 @@ export class TelegramService implements OnModuleInit {
       };
       await this.bot.sendMessage(chatId, 'Select your language:', options);
     });
-
-    // Step 2: Handle selection (language → questions → answers)
+    
     this.bot.on('callback_query', async (callback) => {
       const chatId = callback.message.chat.id;
       const data = callback.data;

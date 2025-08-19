@@ -1,26 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Language } from './language.entity';
 import { CreateLanguageDto } from './dto/create-language.dto';
 
 @Injectable()
-export class LanguagesService {
-  constructor(@InjectRepository(Language) private repo: Repository<Language>) {}
+export class LanguagesService implements OnModuleInit {
+  constructor(
+    @InjectRepository(Language) private readonly repo: Repository<Language>,
+  ) {}
 
-  create(dto: CreateLanguageDto) {
+  async create(dto: CreateLanguageDto) {
     return this.repo.save(this.repo.create(dto));
   }
 
-  findAll() {
+  async findAll() {
     return this.repo.find();
   }
 
-  findByCode(code: string) {
+  async findByCode(code: string) {
     return this.repo.findOne({ where: { code } });
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return this.repo.findOne({ where: { id } });
+  }
+
+  /** 
+   * Seed default Ethiopian languages if not exist
+   */
+  async onModuleInit() {
+    const defaultLanguages: CreateLanguageDto[] = [
+      { name: 'Amharic', code: 'am' },
+      { name: 'Oromo', code: 'om' },
+      { name: 'Tigrinya', code: 'ti' },
+      { name: 'Somali', code: 'so' },
+      { name: 'English', code: 'en' }, // keep English as default
+    ];
+
+    for (const lang of defaultLanguages) {
+      const exists = await this.findByCode(lang.code);
+      if (!exists) {
+        await this.create(lang);
+      }
+    }
   }
 }
