@@ -34,19 +34,7 @@ export class QuestionsService {
     return this.repo.save(entity);
   }
 
-  findAll(langCode?: string) {
-    if (langCode) {
-      return this.repo
-        .createQueryBuilder('q')
-        .leftJoinAndSelect('q.language', 'language')
-        .leftJoinAndSelect('q.createdBy', 'createdBy')
-        .where('language.code = :code', { code: langCode })
-        .orderBy('q.createdAt', 'DESC')
-        .getMany();
-    }
-    return this.repo.find({ order: { createdAt: 'DESC' } });
-  }
-
+  
   async findOne(id: number) {
     const q = await this.repo.findOne({ where: { id } });
     if (!q) throw new NotFoundException('Question not found');
@@ -64,4 +52,22 @@ export class QuestionsService {
     await this.repo.remove(q);
     return { success: true };
   }
+ async findAll(langCode?: string) {
+  if (langCode) {
+    return this.repo.find({
+      where: {
+        language: {
+          code: langCode, // assuming your Language entity has a "code" field like "am", "en"
+        },
+      },
+      relations: ['language'], // ensure relation is loaded if eager is false
+    });
+  }
+
+  return this.repo.find({
+    relations: ['language'],
+  });
+
+
+}
 }

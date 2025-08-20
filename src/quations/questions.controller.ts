@@ -32,4 +32,6 @@ export class QuestionsController {
   remove(@Param('id') id: string) {
     return this.service.remove(+id);
   }
+
+
 }

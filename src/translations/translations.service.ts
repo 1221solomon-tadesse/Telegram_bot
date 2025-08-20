@@ -4,36 +4,52 @@ import { Repository } from 'typeorm';
 import { Translation } from './translation.entity';
 import { Question } from '../quations/question.entity';
 import { Language } from '../languages/language.entity';
-import { AddTranslationDto } from './dto/add-translation.dto';
 
 @Injectable()
-export class TranslationsService {
+export class TranslationService {
   constructor(
-    @InjectRepository(Translation) private repo: Repository<Translation>,
-    @InjectRepository(Question) private qRepo: Repository<Question>,
-    @InjectRepository(Language) private langRepo: Repository<Language>,
+    @InjectRepository(Translation) private translationRepo: Repository<Translation>,
+    @InjectRepository(Question) private questionRepo: Repository<Question>,
+    @InjectRepository(Language) private languageRepo: Repository<Language>,
   ) {}
 
-  async add(dto: AddTranslationDto) {
-    const question = await this.qRepo.findOne({ where: { id: dto.questionId } });
-    if (!question) throw new NotFoundException('Question not found');
+  async create(questionId: number, languageCode: string, title: string, content: string) {
+    const question = await this.questionRepo.findOne({ where: { id: questionId } });
+    if (!question) throw new NotFoundException(`Question with id ${questionId} not found`);
 
-    const language = await this.langRepo.findOne({ where: { id: dto.languageId } });
-    if (!language) throw new NotFoundException('Language not found');
+    const language = await this.languageRepo.findOne({ where: { code: languageCode } });
+    if (!language) throw new NotFoundException(`Language ${languageCode} not found`);
 
-    const t = this.repo.create({
-      question,
-      language,
-      title: dto.title,
-      content: dto.content,
-    });
-    return this.repo.save(t);
+    const translation = this.translationRepo.create({ question, language, title, content });
+    return this.translationRepo.save(translation);
   }
 
-  findForQuestion(questionId: number) {
-    return this.repo.find({
-      where: { question: { id: questionId } },
-      relations: { question: true, language: true },
+  async findAll() {
+    return this.translationRepo.find({ relations: ['question', 'language'] });
+  }
+
+  async findOne(id: number) {
+    const translation = await this.translationRepo.findOne({ where: { id }, relations: ['question', 'language'] });
+    if (!translation) throw new NotFoundException(`Translation ${id} not found`);
+    return translation;
+  }
+
+  async update(id: number, title: string, content: string) {
+    const translation = await this.findOne(id);
+    translation.title = title ?? translation.title;
+    translation.content = content ?? translation.content;
+    return this.translationRepo.save(translation);
+  }
+
+  async remove(id: number) {
+    const translation = await this.findOne(id);
+    return this.translationRepo.remove(translation);
+  }
+
+  async findByQuestionAndLanguage(questionId: number, languageCode: string) {
+    return this.translationRepo.findOne({
+      where: { question: { id: questionId }, language: { code: languageCode } },
+      relations: ['question', 'language'],
     });
   }
 }
