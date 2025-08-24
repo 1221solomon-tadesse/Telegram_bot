@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Param, Body, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Put, Delete, Query } from '@nestjs/common';
 import { TranslationService } from './translations.service';
 
 @Controller('translations')
 export class TranslationController {
-  constructor(private readonly service: TranslationService) {}
+  constructor(private readonly translationService: TranslationService) {}
 
   @Post()
   create(
@@ -12,17 +12,21 @@ export class TranslationController {
     @Body('title') title: string,
     @Body('content') content: string,
   ) {
-    return this.service.create(questionId, languageCode, title, content);
+    return this.translationService.create(questionId, languageCode, title, content);
   }
 
+  // ✅ Unified GET handler
   @Get()
-  findAll() {
-    return this.service.findAll();
+  find(@Query('lang') lang?: string) {
+    if (lang) {
+      return this.translationService.findByLanguage(lang); // filtered by lang
+    }
+    return this.translationService.findAll(); // no filter → return all
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.service.findOne(id);
+    return this.translationService.findOne(id);
   }
 
   @Put(':id')
@@ -31,12 +35,12 @@ export class TranslationController {
     @Body('title') title: string,
     @Body('content') content: string,
   ) {
-    return this.service.update(id, title, content);
+    return this.translationService.update(id, title, content);
   }
 
   @Delete(':id')
   remove(@Param('id') id: number) {
-    return this.service.remove(id);
+    return this.translationService.remove(id);
   }
 
   @Get('question/:questionId/:languageCode')
@@ -44,6 +48,6 @@ export class TranslationController {
     @Param('questionId') questionId: number,
     @Param('languageCode') languageCode: string,
   ) {
-    return this.service.findByQuestionAndLanguage(questionId, languageCode);
+    return this.translationService.findByQuestionAndLanguage(questionId, languageCode);
   }
 }

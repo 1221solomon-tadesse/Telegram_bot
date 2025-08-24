@@ -51,5 +51,13 @@ export class TranslationService {
       where: { question: { id: questionId }, language: { code: languageCode } },
       relations: ['question', 'language'],
     });
+
   }
+ async findByLanguage(languageCode: string) {
+  return this.translationRepo.find({
+    where: { language: { code: languageCode } },
+    select: ['title', 'content'], // only return translated text
+    relations: ['language'],
+  });
+}
 }

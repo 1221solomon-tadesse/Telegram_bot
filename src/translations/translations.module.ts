@@ -12,3 +12,4 @@ import { Language } from '../languages/language.entity';
   controllers: [TranslationController],
 })
 export class TranslationsModule {}
+ 
