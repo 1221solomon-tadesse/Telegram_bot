@@ -13,9 +13,8 @@ import { LanguagesModule } from './languages/languages.module';
 import { QuestionsModule } from "./quations/questions.module"
 import { TranslationsModule } from './translations/translations.module';
 import { AssignmentsModule } from './assignments/assignments.module';
-
 import { TelegramModule } from './telegram/telegram.module';
-
+import { TelegramUsersModule } from './telegram-users/telegram-users.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -37,7 +36,8 @@ import { TelegramModule } from './telegram/telegram.module';
     QuestionsModule,
     TranslationsModule,
     AssignmentsModule,
-    TelegramModule, // ✅ add this
+    TelegramModule, // 
+    TelegramUsersModule,
   ],
 })
 export class AppModule {}

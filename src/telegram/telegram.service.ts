@@ -52,7 +52,7 @@ export class TelegramService implements OnModuleInit {
         const langCode = data.split('lang_')[1];
 
         if (langCode === 'en') {
-          // ✅ Fetch original English questions
+          //  Fetch original English questions
           const questions = await this.questionRepo.find({
             where: { language: { code: 'en' } },
             relations: ['language'],
@@ -73,7 +73,7 @@ export class TelegramService implements OnModuleInit {
           return this.bot.sendMessage(chatId, '❓ Select a question:', options);
         }
 
-        // ✅ Fetch translations for other languages
+        //  Fetch translations for other languages
         const translations = await this.translationRepo.find({
           where: { language: { code: langCode } },
           relations: ['question', 'language'],
