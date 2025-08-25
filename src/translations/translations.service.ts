@@ -53,11 +53,24 @@ export class TranslationService {
     });
 
   }
- async findByLanguage(languageCode: string) {
+async findByLanguage(languageCode: string) {
+  if (languageCode === 'en') {
+    // ✅ Explicitly filter only English questions
+    return this.questionRepo.find({
+      where: { language: { code: 'en' } },
+      select: ['title', 'content'],
+      relations: ['language'],
+    });
+  }
+
+  // ✅ Otherwise fetch from translations
   return this.translationRepo.find({
     where: { language: { code: languageCode } },
-    select: ['title', 'content'], // only return translated text
+    select: ['title', 'content'],
     relations: ['language'],
   });
 }
+
+
 }
+

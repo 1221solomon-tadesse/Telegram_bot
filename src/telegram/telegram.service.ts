@@ -13,8 +13,8 @@ export class TelegramService implements OnModuleInit {
   constructor(
     @InjectRepository(Language)
     private languageRepo: Repository<Language>,
-     @InjectRepository(Question) private repo: Repository<Question>,
-     @InjectRepository(Translation) private translationRepo: Repository<Translation>,
+    @InjectRepository(Question) private questionRepo: Repository<Question>,
+    @InjectRepository(Translation) private translationRepo: Repository<Translation>,
   ) {}
 
   onModuleInit() {
@@ -26,6 +26,7 @@ export class TelegramService implements OnModuleInit {
     this.bot.onText(/\/start/, async (msg) => {
       const chatId = msg.chat.id;
       const languages = await this.languageRepo.find();
+
       if (!languages.length) {
         return this.bot.sendMessage(chatId, 'No languages available yet.');
       }
@@ -37,6 +38,7 @@ export class TelegramService implements OnModuleInit {
           ]),
         },
       };
+
       await this.bot.sendMessage(chatId, '🌍 Select your language:', options);
     });
 
@@ -49,7 +51,29 @@ export class TelegramService implements OnModuleInit {
       if (data.startsWith('lang_')) {
         const langCode = data.split('lang_')[1];
 
-        // get translations for selected language
+        if (langCode === 'en') {
+          // ✅ Fetch original English questions
+          const questions = await this.questionRepo.find({
+            where: { language: { code: 'en' } },
+            relations: ['language'],
+          });
+
+          if (!questions.length) {
+            return this.bot.sendMessage(chatId, '⚠️ No English questions found.');
+          }
+
+          const options = {
+            reply_markup: {
+              inline_keyboard: questions.map((q) => [
+                { text: q.title, callback_data: `q_en_${q.id}` }, // mark as English question
+              ]),
+            },
+          };
+
+          return this.bot.sendMessage(chatId, '❓ Select a question:', options);
+        }
+
+        // ✅ Fetch translations for other languages
         const translations = await this.translationRepo.find({
           where: { language: { code: langCode } },
           relations: ['question', 'language'],
@@ -62,7 +86,7 @@ export class TelegramService implements OnModuleInit {
         const options = {
           reply_markup: {
             inline_keyboard: translations.map((t) => [
-              { text: t.title, callback_data: `q_${t.id}` }, // use translation id
+              { text: t.title, callback_data: `q_tr_${t.id}` }, // mark as translation
             ]),
           },
         };
@@ -70,12 +94,25 @@ export class TelegramService implements OnModuleInit {
         return this.bot.sendMessage(chatId, '❓ Select a question:', options);
       }
 
-      // QUESTION SELECTED
-      if (data.startsWith('q_')) {
-        const tId = Number(data.split('_')[1]);
+      // QUESTION SELECTED (English)
+      if (data.startsWith('q_en_')) {
+        const qId = Number(data.split('_')[2]);
+        const question = await this.questionRepo.findOne({
+          where: { id: qId },
+        });
+
+        if (!question) {
+          return this.bot.sendMessage(chatId, '❌ Question not found.');
+        }
+
+        return this.bot.sendMessage(chatId, `💡 Answer: ${question.content}`);
+      }
+
+      // QUESTION SELECTED (Translated)
+      if (data.startsWith('q_tr_')) {
+        const tId = Number(data.split('_')[2]);
         const translation = await this.translationRepo.findOne({
           where: { id: tId },
-          relations: ['question', 'language'],
         });
 
         if (!translation) {
@@ -87,7 +124,7 @@ export class TelegramService implements OnModuleInit {
     });
   }
 
-  // ✅ For manual message sending
+  // ✅ Manual message sending
   async sendManualMessage(chatId: number, text: string) {
     if (!this.bot) throw new Error('Bot not initialized');
     return this.bot.sendMessage(chatId, text);
