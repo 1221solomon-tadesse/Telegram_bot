@@ -6,7 +6,7 @@ export class TelegramUser {
   id: number;
 
   @Column({ unique: true })
-  telegramId: string; // Telegram's unique user id
+  telegramId: string; 
 
   @Column({ nullable: true })
   username: string;
@@ -18,7 +18,7 @@ export class TelegramUser {
   lastName: string;
 
   @Column({ default: true })
-  isActive: boolean; // manage active/inactive users
+  isActive: boolean; 
 
   @CreateDateColumn()
   createdAt: Date;
