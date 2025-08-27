@@ -6,12 +6,10 @@ import { Language } from '../languages/language.entity';
 import { Question } from '../quations/question.entity';
 import { Translation } from '../translations/translation.entity';
 import { TelegramUser } from '../telegram-users/telegram-user.entity';
-
 @Injectable()
 export class TelegramService implements OnModuleInit {
   private bot: TelegramBot;
   private userSessions: Map<number, string>; // track steps per chat
-
   constructor(
     @InjectRepository(Language) private languageRepo: Repository<Language>,
     @InjectRepository(Question) private questionRepo: Repository<Question>,
@@ -20,12 +18,13 @@ export class TelegramService implements OnModuleInit {
   ) {
     this.userSessions = new Map();
   }
-
   onModuleInit() {
     const token = process.env.TELEGRAM_BOT_TOKEN;
     if (!token) throw new Error('TELEGRAM_BOT_TOKEN is not set');
     this.bot = new TelegramBot(token, { polling: true });
-
+    this.bot.setMyCommands([
+  { command: "start", description: "Start the bot" },
+]);
     // Step 1: /start
     this.bot.onText(/\/start/, async (msg) => {
       const chatId = msg.chat.id;
@@ -47,7 +46,7 @@ export class TelegramService implements OnModuleInit {
         });
         await this.userRepo.save(user);
       }
-      
+
       // ask for first name
       await this.bot.sendMessage(chatId, '👋 Welcome! Please enter your *First Name*:', {
         parse_mode: 'Markdown',
@@ -78,10 +77,8 @@ export class TelegramService implements OnModuleInit {
       if (step === 'ask_last_name') {
         user.lastName = msg.text.trim();
         await this.userRepo.save(user);
-
         await this.bot.sendMessage(chatId, `✅ Thanks, ${user.firstName} ${user.lastName}!`);
         this.userSessions.delete(chatId);
-
         // move to language selection
         return this.askLanguage(chatId);
       }
@@ -161,4 +158,6 @@ export class TelegramService implements OnModuleInit {
     if (!this.bot) throw new Error('Bot not initialized');
     return this.bot.sendMessage(chatId, text);
   }
+   
+   
 }

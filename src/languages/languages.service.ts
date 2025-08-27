@@ -26,13 +26,13 @@ export class LanguagesService implements OnModuleInit {
     return this.repo.findOne({ where: { id } });
   }
 
-  /** 
-   * Seed default Ethiopian languages if not exist
-   */
+  
+    // Seed default Ethiopian languages if not exist
+   
   async onModuleInit() {
     const defaultLanguages: CreateLanguageDto[] = [
-      { name: 'Amharic', code: 'am' },
-      { name: 'Oromo', code: 'om' },
+      { name: 'Amharic', code: 'amha' },
+      { name: 'Oromifa', code: 'oro' },
       { name: 'Tigrinya', code: 'ti' },
       { name: 'Somali', code: 'so' },
       { name: 'English', code: 'en' }, // keep English as default
