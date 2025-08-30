@@ -14,7 +14,6 @@ export class TranslationController {
   ) {
     return this.translationService.create(questionId, languageCode, title, content);
   }
-
   // ✅ Unified GET handler
   @Get()
   find(@Query('lang') lang?: string) {

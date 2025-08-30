@@ -12,10 +12,10 @@ export class Question {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()           // English title (if language=en)
+  @Column()           
   title: string;
 
-  @Column('text')     // English answer/content
+  @Column('text')    
   content: string;
 
   @ManyToOne(() => Language, (lang) => lang.questions, { eager: true })
