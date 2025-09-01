@@ -1,13 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Question } from '../quations/question.entity';
+import { CatTranslation } from 'src/categoryTranslation/catTranslation.entity';
 
 @Entity()
 export class Category {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  name: string;
-
-  @Column({ nullable: true })
-  description?: string;
+  @OneToMany(() => Question, (question) => question.category)
+  questions: Question[];
+  @OneToMany(() => CatTranslation, (c) => c.categories, { cascade: true })
+    catTranslation: CatTranslation[];
+  
 }

@@ -9,6 +9,8 @@ export class CreateQuestionDto {
 
   @IsInt()
   languageId: number;
+  @IsInt()
+  categoryId?: number;
 
   @IsInt()
   @IsOptional()

@@ -8,4 +8,8 @@ export class UpdateQuestionDto {
   @IsString()
   @IsOptional()
   content?: string;
+  @IsString()
+  @IsOptional()
+  categoryId:string;
+
 }

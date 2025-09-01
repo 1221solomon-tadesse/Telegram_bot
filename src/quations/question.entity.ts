@@ -6,6 +6,7 @@ import { Language } from '../languages/language.entity';
 import { User } from '../users/user.entity';
 import { Translation } from '../translations/translation.entity';
 import { Assignment } from '../assignments/assignment.entity';
+import { Category } from '../category/category.entity';
 
 @Entity()
 export class Question {
@@ -17,7 +18,8 @@ export class Question {
 
   @Column('text')    
   content: string;
-
+ @ManyToOne(() => Category, (category) => category.questions, { eager: true })
+  category: Category;
   @ManyToOne(() => Language, (lang) => lang.questions, { eager: true })
   language: Language;
 

@@ -5,9 +5,10 @@ import { QuestionsService } from './questions.service';
 import { QuestionsController } from './questions.controller';
 import { Language } from '../languages/language.entity';
 import { User } from '../users/user.entity';
+import { Category } from '../category/category.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Question, Language, User])],
+  imports: [TypeOrmModule.forFeature([Question, Language, User,Category ])],
   providers: [QuestionsService],
   controllers: [QuestionsController],
   exports: [QuestionsService],

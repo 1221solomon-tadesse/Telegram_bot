@@ -6,6 +6,7 @@ import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { Language } from '../languages/language.entity';
 import { User } from '../users/user.entity';
+import { Category } from '../category/category.entity';
 
 @Injectable()
 export class QuestionsService {
@@ -13,6 +14,7 @@ export class QuestionsService {
     @InjectRepository(Question) private repo: Repository<Question>,
     @InjectRepository(Language) private langRepo: Repository<Language>,
     @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Category) private categoryRepo: Repository<Category>,
   ) {}
 
   async create(dto: CreateQuestionDto) {
@@ -25,24 +27,37 @@ export class QuestionsService {
       if (!createdBy) throw new NotFoundException('Creator user not found');
     }
 
+    let category: Category | null = null;
+    if (dto.categoryId) {
+      category = await this.categoryRepo.findOne({ where: { id: dto.categoryId } });
+      if (!category) throw new NotFoundException('Category not found');
+    }
+
     const entity = this.repo.create({
       title: dto.title,
       content: dto.content,
       language,
-      createdBy: createdBy ?? null,
+      createdBy: createdBy ?? undefined,
+      category: category ?? undefined,
     });
     return this.repo.save(entity);
   }
 
-  
   async findOne(id: number) {
-    const q = await this.repo.findOne({ where: { id } });
+    const q = await this.repo.findOne({ where: { id }, relations: ['category', 'language'] });
     if (!q) throw new NotFoundException('Question not found');
     return q;
   }
 
   async update(id: number, dto: UpdateQuestionDto) {
     const q = await this.findOne(id);
+
+    if (dto.categoryId) {
+      const category = await this.categoryRepo.findOne({ where: { id: Number(dto.categoryId) } });
+      if (!category) throw new NotFoundException('Category not found');
+      q.category = category;
+    }
+
     Object.assign(q, dto);
     return this.repo.save(q);
   }
@@ -52,22 +67,24 @@ export class QuestionsService {
     await this.repo.remove(q);
     return { success: true };
   }
- async findAll(langCode?: string) {
-  if (langCode) {
+
+  async findAll(langCode?: string, categoryId?: number) {
+    const where: any = {};
+    if (langCode) {
+      where.language = { code: langCode };
+    }
+    if (categoryId) {
+      where.category = { id: categoryId };
+    }
     return this.repo.find({
-      where: {
-        language: {
-          code: langCode, // assuming your Language entity has a "code" field like "am", "en"
-        },
-      },
-      relations: ['language'], // ensure relation is loaded if eager is false
+      where,
+      relations: ['language', 'category'],
     });
   }
-
-  return this.repo.find({
-    relations: ['language'],
-  });
-
-
-}
+  async findByCategory(categoryId: number) {
+    return this.repo.find({
+      where: { category: { id: categoryId } },
+      relations: ['category', 'language'],
+    });
+  }
 }
