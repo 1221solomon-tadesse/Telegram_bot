@@ -18,6 +18,7 @@ import { TelegramUsersModule } from './telegram-users/telegram-users.module';
 import { TelegramUser } from './telegram-users/telegram-user.entity';
 import { Category } from './category/category.entity';
 import { CategoryModule } from './category/Category.module';
+import { CatTranslation } from './categoryTranslation/catTranslation.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -30,7 +31,7 @@ import { CategoryModule } from './category/Category.module';
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_NAME'),
-        entities: [User, Language, Question, Translation, Assignment,TelegramUser,Category],
+        entities: [User, Language, Question, Translation, Assignment,TelegramUser,Category,CatTranslation],
         synchronize: process.env.NODE_ENV !== 'production',
       }),
     }),

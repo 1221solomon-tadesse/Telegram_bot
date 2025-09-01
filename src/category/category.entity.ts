@@ -9,6 +9,5 @@ export class Category {
   @OneToMany(() => Question, (question) => question.category)
   questions: Question[];
   @OneToMany(() => CatTranslation, (c) => c.categories, { cascade: true })
-    catTranslation: CatTranslation[];
-  
+catTranslation: CatTranslation[];
 }
